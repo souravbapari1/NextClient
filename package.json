@@ -1,15 +1,22 @@
 {
   "name": "nextclient",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
-  "author": "Sourav Bapari",
+  "author": "Sourav Bapari <dev.souravbapari@gmail.com>",
   "license": "ISC",
   "description": "use http request in very easy way",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/souravbapari1/NextClient"
+  },
+  "bugs": {
+    "url": "https://github.com/souravbapari1/NextClient/issues"
+  },
   "devDependencies": {
     "typescript": "^5.6.3"
   }
