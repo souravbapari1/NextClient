@@ -11,7 +11,7 @@ The `NextClient` library provides a simple and consistent interface for interact
 Include the library in your project by importing the necessary classes:
 
 ```javascript
-import { NextClient } from "./NextClient";
+import NextClient from "nextclient";
 ```
 
 ---
@@ -23,6 +23,7 @@ import { NextClient } from "./NextClient";
 Create an instance of the `NextClient` by specifying the base URL of your API.
 
 ```javascript
+// init your client
 const client = new NextClient("https://api.example.com", {
   headers: {
     Authorization: "Bearer YOUR_API_TOKEN",
@@ -54,7 +55,8 @@ Use `post()` to send data as JSON.
 
 ```javascript
 client
-  .post("/users", { name: "John Doe", email: "john@example.com" })
+  .post("/users")
+  .json({ name: "John Doe", email: "john@example.com" })
   .send()
   .then((response) => console.log(response))
   .catch((error) => console.error(error));
@@ -68,7 +70,8 @@ Use `put()` to update resources.
 
 ```javascript
 client
-  .put("/users/1", { email: "john.new@example.com" })
+  .put("/users/1")
+  .json({ email: "john.new@example.com" })
   .send()
   .then((response) => console.log(response))
   .catch((error) => console.error(error));
@@ -82,7 +85,8 @@ Use `patch()` for partial updates.
 
 ```javascript
 client
-  .patch("/users/1", { email: "john.partial@example.com" })
+  .patch("/users/1")
+  .json({ email: "john.partial@example.com" })
   .send()
   .then((response) => console.log(response))
   .catch((error) => console.error(error));
@@ -112,8 +116,7 @@ If you need to send `FormData` instead of JSON, use the `form()` method.
 client
   .post("/upload")
   .form({
-    file: new Blob(["file content"], { type: "text/plain" }),
-    name: "example.txt",
+    name: "example",
   })
   .send()
   .then((response) => console.log(response))
@@ -125,8 +128,34 @@ You can also append files:
 ```javascript
 client
   .post("/upload")
-  .form({})
-  .append("file", new File(["file content"], "example.txt"))
+  .form({
+    name: "example",
+  })
+  .append("file", File)
+  .send()
+  .then((response) => console.log(response))
+  .catch((error) => console.error(error));
+```
+
+You can also append multiple files:
+
+```javascript
+const data = {
+  name: "example",
+};
+
+const request = client.post("/upload").form(data);
+
+// For List for files
+[f1, f2, f2].forEach((file) => {
+  request.append("files", File);
+});
+
+// for signal files
+request.append("profile", ProfileFile);
+
+// finally send request
+request
   .send()
   .then((response) => console.log(response))
   .catch((error) => console.error(error));
@@ -208,7 +237,7 @@ Custom error for non-200 responses.
 
 ## Examples
 
-### Fetch with Query Parameters
+### Fetch with Query Parameters `/search?term=example&limit=5`
 
 ```javascript
 client
@@ -222,7 +251,8 @@ client
 
 ```javascript
 client
-  .post("/items", { name: "New Item", description: "A test item" })
+  .post("/items")
+  .json({ name: "New Item", description: "A test item" })
   .send()
   .then((response) => console.log(response))
   .catch((error) => console.error(error));
@@ -232,7 +262,8 @@ client
 
 ```javascript
 client
-  .put("/items/1", { description: "Updated description" })
+  .put("/items/1")
+  .json({ description: "Updated description" })
   .send()
   .then((response) => console.log(response))
   .catch((error) => console.error(error));
