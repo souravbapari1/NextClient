@@ -1,10 +1,16 @@
 {
   "name": "nextclient",
-  "version": "1.0.11",
+  "version": "1.0.2",
   "main": "./",
   "type": "module",
+  "keywords": [
+    "xhr",
+    "http",
+    "ajax",
+    "promise",
+    "fetch"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
   "author": "Sourav Bapari <dev.souravbapari@gmail.com>",
