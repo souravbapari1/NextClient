@@ -46,7 +46,7 @@ export class JsonRequest {
    * @throws {HttpError} If the HTTP response status is not ok, throws an HttpError with the response status and error text.
    * @throws {Error} If the response content type is unsupported or if there is a network error.
    */
-  async send<T, ERROR>(headers?: RequestInit["headers"]): Promise<T> {
+  async send<T>(headers?: RequestInit["headers"]): Promise<T> {
     try {
       const url = new URL(this.path, this.host);
       url.search = this.searchParams.toString();
@@ -62,21 +62,24 @@ export class JsonRequest {
         method: this.method,
         body: JSON.stringify(this.formData),
       });
+      const contentType = response.headers.get("Content-Type") || "";
 
       if (!response.ok) {
-        // Try to parse the response as JSON
+        // Clone the response to allow multiple reads of its body
+        let clonedResponse = response.clone();
         let errorText: string | object;
+
         try {
-          errorText = await response.json();
+          errorText = await clonedResponse.json();
         } catch (jsonError) {
           // If parsing as JSON fails, fallback to text
           errorText = await response.text();
         }
-        throw new HttpError<ERROR>(response.status, errorText);
+
+        throw new HttpError(response.status, errorText);
       }
 
       // Check the Content-Type header to determine how to parse the response
-      const contentType = response.headers.get("Content-Type") || "";
 
       if (contentType.includes("application/json")) {
         // Parse response body as JSON

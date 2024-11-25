@@ -155,6 +155,6 @@ export class ToPath {
       this.searchParams,
       this.config
     );
-    return await request.send<T, ERROR>(headers, init);
+    return await request.send<T>(headers, init);
   }
 }

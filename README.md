@@ -117,6 +117,7 @@ client
   .post("/upload")
   .form({
     name: "example",
+    learn: ["english", "hindi", "bengali"],
   })
   .send()
   .then((response) => console.log(response))
@@ -130,8 +131,9 @@ client
   .post("/upload")
   .form({
     name: "example",
+    file: File,
   })
-  .append("file", File)
+  .append("image", ImageFile)
   .send()
   .then((response) => console.log(response))
   .catch((error) => console.error(error));
@@ -142,11 +144,12 @@ You can also append multiple files:
 ```javascript
 const data = {
   name: "example",
+  docs: [doc1, doc2, doc3],
 };
 
 const request = client.post("/upload").form(data);
 
-// For List for files
+// For List for files Append
 [f1, f2, f2].forEach((file) => {
   request.append("files", File);
 });

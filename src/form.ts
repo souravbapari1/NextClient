@@ -61,7 +61,7 @@ export class FormRequest {
    * @throws HttpError if the response status is an error
    * @throws Error if the response content type is unsupported
    */
-  async send<T, ERROR>(
+  async send<T>(
     headers?: RequestInit["headers"],
     init?: RequestInit
   ): Promise<T> {
@@ -78,15 +78,18 @@ export class FormRequest {
       });
 
       if (!response.ok) {
-        // Try to parse the response as JSON
+        let clonedResponse = response.clone();
+        // Clone the response to allow multiple reads of its body
         let errorText: string | object;
+
         try {
-          errorText = await response.json();
+          errorText = await clonedResponse.json();
         } catch (jsonError) {
           // If parsing as JSON fails, fallback to text
           errorText = await response.text();
         }
-        throw new HttpError<ERROR>(response.status, errorText);
+
+        throw new HttpError(response.status, errorText);
       }
 
       // Check the Content-Type header to determine how to parse the response

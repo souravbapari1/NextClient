@@ -1,8 +1,7 @@
-import { isNextClientError } from "..";
 import { HttpError } from "../errror";
 import { NextClient } from "../request";
 const client = new NextClient(
-  "https://g2g-pocketbase.souravbapari.in",
+  "https://g2g-files.souravbapari.in",
   {
     headers: {
       "x-secret-key": "123456",
@@ -21,15 +20,14 @@ const getData = async () => {
 
   try {
     const response = await client
-      .post("/api/collections/learn/recordsas")
+      .post("/test")
       .form({
-        test: "[]",
-        name: "sourav0",
-        email: "sourav0w@gmail.com",
-        image: file,
-        file: [file, file2],
+        status: true,
+        age: 5,
+        map: { sourav: "sourav" },
+        files: [file, file2],
       })
-      .send<any, { code: number }>();
+      .send();
     console.log(response);
   } catch (error) {
     if (error instanceof HttpError) {
