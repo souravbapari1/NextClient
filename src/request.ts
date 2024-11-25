@@ -1,5 +1,5 @@
 import { ToPath } from "./to";
-import { NextClientConfig } from "./types/config";
+import { NextClientConfig } from "../dist/types/config";
 
 export class NextClient {
   baseUrl: string;

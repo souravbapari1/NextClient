@@ -11,6 +11,6 @@
     "skipLibCheck": true, // Skip library checks to avoid unnecessary issues
     "lib": ["es2017", "dom"] // Add es2017 to include the latest ECMAScript features
   },
-  "include": ["src/**/*"], // Include all files in the src directory
+  "include": ["src/**/*", "dist/types"], // Include all files in the src directory
   "exclude": ["node_modules"] // Exclude node_modules
 }

@@ -1,6 +1,6 @@
 import { HttpError } from "./errror";
 import { TMethads } from "./to";
-import { NextClientConfig } from "./types/config";
+import { NextClientConfig } from "../dist/types/config";
 
 export class FormRequest {
   private formData: FormData;

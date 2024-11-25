@@ -1,6 +1,6 @@
 import { FormRequest } from "./form";
 import { JsonRequest } from "./json";
-import { NextClientConfig } from "./types/config";
+import { NextClientConfig } from "../dist/types/config";
 
 export type TMethads =
   | "GET"
