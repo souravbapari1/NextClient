@@ -279,8 +279,7 @@ const file = new File(["Hello, world!"], "hello.txt", { type: "text/plain" });
 
 client
   .post("/upload")
-  .form({})
-  .append("file", file)
+  .form({ file: file })
   .send()
   .then((response) => console.log(response))
   .catch((error) => console.error(error));
