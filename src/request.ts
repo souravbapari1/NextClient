@@ -1,7 +1,9 @@
 import { ToPath } from "./to";
+import { NextClientConfig } from "./types/config";
 
 export class NextClient {
   baseUrl: string;
+  config?: NextClientConfig;
   private init: RequestInit;
   private searchParams: URLSearchParams | undefined;
   /**
@@ -10,8 +12,9 @@ export class NextClient {
    * @param baseUrl - The base URL for the API.
    * @param init - Optional request initialization parameters. Defaults to a GET method with no-store cache setting if not provided.
    */
-  constructor(baseUrl: string, init?: RequestInit) {
+  constructor(baseUrl: string, init?: RequestInit, config?: NextClientConfig) {
     this.baseUrl = baseUrl;
+    this.config = config;
     this.init = init || {
       method: "GET",
       cache: "no-store",
@@ -43,7 +46,14 @@ export class NextClient {
    */
   get(path: string, query?: { [key: string]: string | number }) {
     this.searchParams = this.setSearchParams(query ?? {});
-    return new ToPath(path, this.baseUrl, this.init, "GET", this.searchParams);
+    return new ToPath(
+      path,
+      this.baseUrl,
+      this.init,
+      "GET",
+      this.searchParams,
+      this.config
+    );
   }
 
   /**
@@ -54,7 +64,14 @@ export class NextClient {
    */
   post(path: string, query?: { [key: string]: string | number }) {
     this.searchParams = this.setSearchParams(query ?? {});
-    return new ToPath(path, this.baseUrl, this.init, "POST", this.searchParams);
+    return new ToPath(
+      path,
+      this.baseUrl,
+      this.init,
+      "POST",
+      this.searchParams,
+      this.config
+    );
   }
 
   /**
@@ -65,7 +82,14 @@ export class NextClient {
    */
   put(path: string, query?: { [key: string]: string | number }) {
     this.searchParams = this.setSearchParams(query ?? {});
-    return new ToPath(path, this.baseUrl, this.init, "PUT", this.searchParams);
+    return new ToPath(
+      path,
+      this.baseUrl,
+      this.init,
+      "PUT",
+      this.searchParams,
+      this.config
+    );
   }
 
   /**
@@ -81,7 +105,8 @@ export class NextClient {
       this.baseUrl,
       this.init,
       "PATCH",
-      this.searchParams
+      this.searchParams,
+      this.config
     );
   }
 
@@ -98,7 +123,8 @@ export class NextClient {
       this.baseUrl,
       this.init,
       "DELETE",
-      this.searchParams
+      this.searchParams,
+      this.config
     );
   }
 }

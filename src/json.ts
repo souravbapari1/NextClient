@@ -1,5 +1,6 @@
 import { HttpError } from "./errror";
 import { TMethads } from "./to";
+import { NextClientConfig } from "./types/config";
 
 export class JsonRequest {
   private formData: Object;
@@ -8,6 +9,7 @@ export class JsonRequest {
   private init: RequestInit;
   private method: TMethads;
   private searchParams: URLSearchParams;
+  private config?: NextClientConfig;
   /**
    * Constructor for JsonRequest.
    *
@@ -24,7 +26,8 @@ export class JsonRequest {
     host: string,
     init: RequestInit,
     method: TMethads,
-    searchParams: URLSearchParams
+    searchParams: URLSearchParams,
+    config?: NextClientConfig
   ) {
     this.formData = formData;
     this.method = method;
@@ -32,6 +35,7 @@ export class JsonRequest {
     this.host = host;
     this.init = init;
     this.searchParams = searchParams;
+    this.config = config;
   }
   /**
    * Sends an HTTP request to the specified path and host with the provided headers and returns the response.
@@ -42,7 +46,7 @@ export class JsonRequest {
    * @throws {HttpError} If the HTTP response status is not ok, throws an HttpError with the response status and error text.
    * @throws {Error} If the response content type is unsupported or if there is a network error.
    */
-  async send<T>(headers?: RequestInit["headers"]): Promise<T> {
+  async send<T, ERROR>(headers?: RequestInit["headers"]): Promise<T> {
     try {
       const url = new URL(this.path, this.host);
       url.search = this.searchParams.toString();
@@ -68,7 +72,7 @@ export class JsonRequest {
           // If parsing as JSON fails, fallback to text
           errorText = await response.text();
         }
-        throw new HttpError(response.status, errorText);
+        throw new HttpError<ERROR>(response.status, errorText);
       }
 
       // Check the Content-Type header to determine how to parse the response
@@ -88,10 +92,33 @@ export class JsonRequest {
       }
     } catch (error) {
       // Handle network errors or JSON parsing errors
-      if (error instanceof HttpError) {
-        console.error(`HTTP Error ${error.statusCode}:`, error.response);
-      } else {
-        console.error("Request failed:", error);
+      if (this.config?.debug) {
+        if (error instanceof HttpError) {
+          const url = new URL(this.path, this.host);
+          url.search = this.searchParams.toString();
+          console.log(
+            "\n================= NEXT CLIENT DEBUG ================= \n"
+          );
+          console.log(`ENDPOINT: => ${url}`);
+          console.log(`METHOD: => ${this.method} \n`);
+          console.log(`PAYLOAD: =>`, this.formData);
+          console.log(
+            "\n------------------------------------------------------\n"
+          );
+          console.log(`STATUS CODE: => ${error.statusCode}`);
+          console.debug("RESPONSE: =>", error.response);
+          console.log(
+            "\n------------------------------------------------------\n"
+          );
+        } else {
+          console.log(
+            "\n================= NEXT CLIENT DEBUG ================= \n"
+          );
+          console.error("Request failed:", error);
+          console.log(
+            "\n------------------------------------------------------\n"
+          );
+        }
       }
       throw error;
     }

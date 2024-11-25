@@ -1,5 +1,6 @@
 import { FormRequest } from "./form";
 import { JsonRequest } from "./json";
+import { NextClientConfig } from "./types/config";
 
 export type TMethads =
   | "GET"
@@ -16,6 +17,8 @@ export class ToPath {
   private init: RequestInit;
   private method: TMethads;
   private searchParams: URLSearchParams;
+  private config?: NextClientConfig;
+
   /**
    * Constructor for ToPath.
    *
@@ -30,33 +33,65 @@ export class ToPath {
     host: string,
     init: RequestInit,
     method: TMethads,
-    searchParams: URLSearchParams
+    searchParams: URLSearchParams,
+    config?: NextClientConfig
   ) {
     this.path = path;
     this.host = host;
     this.init = init;
     this.method = method;
     this.searchParams = searchParams;
+    this.config = config;
   }
-
   /**
    * Converts a JSON object into a FormData object.
+   * Handles different data types such as string, string[], File, File[], and nested objects.
    *
    * @param {Record<string, any>} jsonObject The JSON object to be converted.
-   * @param {{ [key: string]: string | number }} query The query string parameters.
+   * @param {FormData} [formData] Optional FormData object to append to (useful for recursion).
+   * @param {string} [parentKey] Optional parent key for nested objects.
    * @returns {FormData} The FormData object.
    */
   private jsonToFormData(
     jsonObject: Record<string, any>,
-    query?: { [key: string]: string | number }
+    formData: FormData = new FormData(),
+    parentKey: string = ""
   ): FormData {
-    const formData = new FormData();
-
-    // Iterate over the keys of the JSON object
     for (const key in jsonObject) {
       if (jsonObject.hasOwnProperty(key)) {
-        // Append each key-value pair to the FormData object
-        formData.append(key, jsonObject[key]);
+        const value = jsonObject[key];
+        const formKey = parentKey ? `${parentKey}[${key}]` : key;
+
+        if (value instanceof File) {
+          // Handle File
+          const formKeyFile = parentKey || key;
+          formData.append(formKeyFile, value);
+        } else if (Array.isArray(value)) {
+          // Handle arrays (including empty and single-value arrays)
+          if (value.length === 0) {
+            // Append an empty key for empty arrays
+            formData.append(formKey, "");
+          } else {
+            value.forEach((item, index) => {
+              const arrayKey = `${formKey}[${index}]`;
+              if (item instanceof File) {
+                formData.append(formKey, item);
+              } else {
+                formData.append(arrayKey, item?.toString() || "");
+              }
+            });
+          }
+        } else if (
+          value &&
+          typeof value === "object" &&
+          !(value instanceof File)
+        ) {
+          // Handle nested objects
+          this.jsonToFormData(value, formData, formKey);
+        } else {
+          // Handle primitive values (including null and undefined)
+          formData.append(formKey, value?.toString() || "");
+        }
       }
     }
     return formData;
@@ -79,7 +114,8 @@ export class ToPath {
       this.host,
       this.init,
       this.method,
-      this.searchParams
+      this.searchParams,
+      this.config
     );
   }
   /**
@@ -89,14 +125,15 @@ export class ToPath {
    * @param {T | Record<string, any>} data The data to be sent as a JSON body.
    * @returns {JsonRequest} The JsonRequest instance.
    */
-  json<T>(data: T | Record<string, any>) {
+  json<T>(data?: T | Record<string, any>) {
     return new JsonRequest(
       data as Record<string, any>,
       this.path,
       this.host,
       this.init,
       this.method,
-      this.searchParams
+      this.searchParams,
+      this.config
     );
   }
   /**
@@ -107,7 +144,7 @@ export class ToPath {
    * @param {RequestInit} [init] Optional custom initialization options for the request.
    * @returns {Promise<T>} A promise that resolves with the response data of type T.
    */
-  async send<T>(headers?: RequestInit["headers"], init?: RequestInit) {
+  async send<T, ERROR>(headers?: RequestInit["headers"], init?: RequestInit) {
     const formData = new FormData();
     const request = new FormRequest(
       formData,
@@ -115,8 +152,9 @@ export class ToPath {
       this.host,
       this.init,
       this.method,
-      this.searchParams
+      this.searchParams,
+      this.config
     );
-    return await request.send<T>(headers, init);
+    return await request.send<T, ERROR>(headers, init);
   }
 }

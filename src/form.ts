@@ -1,5 +1,6 @@
 import { HttpError } from "./errror";
 import { TMethads } from "./to";
+import { NextClientConfig } from "./types/config";
 
 export class FormRequest {
   private formData: FormData;
@@ -8,6 +9,7 @@ export class FormRequest {
   private init: RequestInit;
   private method: TMethads;
   private searchParams: URLSearchParams;
+  private config?: NextClientConfig;
   /**
    * Constructor for FormRequest.
    * @param formData FormData to be sent
@@ -23,7 +25,8 @@ export class FormRequest {
     host: string,
     init: RequestInit,
     method: TMethads,
-    searchParams: URLSearchParams
+    searchParams: URLSearchParams,
+    config?: NextClientConfig
   ) {
     this.formData = formData;
     this.method = method;
@@ -31,6 +34,7 @@ export class FormRequest {
     this.host = host;
     this.init = init;
     this.searchParams = searchParams;
+    this.config = config;
   }
   /**
    * Append a file to the FormData.
@@ -49,6 +53,7 @@ export class FormRequest {
       this.searchParams
     );
   }
+
   /**
    * Send the request and return the response body as T.
    * @param headers Additional headers to send with the request
@@ -56,34 +61,80 @@ export class FormRequest {
    * @throws HttpError if the response status is an error
    * @throws Error if the response content type is unsupported
    */
-  async send<T>(
+  async send<T, ERROR>(
     headers?: RequestInit["headers"],
     init?: RequestInit
   ): Promise<T> {
-    const url = new URL(this.path, this.host);
-    url.search = this.searchParams.toString();
+    try {
+      const url = new URL(this.path, this.host);
+      url.search = this.searchParams.toString();
 
-    const response = await fetch(url, {
-      ...this.init,
-      ...init,
-      headers: { ...this.init.headers, ...headers },
-      method: this.method,
-      body: this.method === "GET" ? null : this.formData,
-    });
+      const response = await fetch(url, {
+        ...this.init,
+        ...init,
+        headers: { ...this.init.headers, ...headers },
+        method: this.method,
+        body: this.method === "GET" ? null : this.formData,
+      });
 
-    if (!response.ok) {
-      const errorText = await response.json().catch((_) => response.text());
-      throw new HttpError(response.status, errorText);
-    }
+      if (!response.ok) {
+        // Try to parse the response as JSON
+        let errorText: string | object;
+        try {
+          errorText = await response.json();
+        } catch (jsonError) {
+          // If parsing as JSON fails, fallback to text
+          errorText = await response.text();
+        }
+        throw new HttpError<ERROR>(response.status, errorText);
+      }
 
-    const contentType = response.headers.get("Content-Type") || "";
+      // Check the Content-Type header to determine how to parse the response
+      const contentType = response.headers.get("Content-Type") || "";
 
-    if (contentType.includes("application/json")) {
-      return (await response.json()) as T;
-    } else if (contentType.includes("text/") || contentType === "") {
-      return (await response.text()) as T;
-    } else {
-      throw new Error(`Unsupported content type: ${contentType}`);
+      if (contentType.includes("application/json")) {
+        // Parse response body as JSON
+        const responseData: T = await response.json();
+        return responseData;
+      } else if (contentType.includes("text/") || contentType == "") {
+        // Parse response body as text
+        const responseData: T = (await response.text()) as T;
+        return responseData;
+      } else {
+        // Handle unexpected content types
+        throw new Error(`Unsupported content type: ${contentType}`);
+      }
+    } catch (error) {
+      // Handle network errors or JSON parsing errors
+      if (this.config?.debug) {
+        if (error instanceof HttpError) {
+          const url = new URL(this.path, this.host);
+          url.search = this.searchParams.toString();
+          console.log(
+            "\n================= NEXT CLIENT DEBUG ================= \n"
+          );
+          console.log(`ENDPOINT: => ${url}`);
+          console.log(`METHOD: => ${this.method} \n`);
+          console.log(`PAYLOAD: =>`, this.formData);
+          console.log(
+            "\n------------------------------------------------------\n"
+          );
+          console.log(`STATUS CODE: => ${error.statusCode}`);
+          console.debug("RESPONSE: =>", error.response);
+          console.log(
+            "\n------------------------------------------------------\n"
+          );
+        } else {
+          console.log(
+            "\n================= NEXT CLIENT DEBUG ================= \n"
+          );
+          console.error("Request failed:", error);
+          console.log(
+            "\n------------------------------------------------------\n"
+          );
+        }
+      }
+      throw error;
     }
   }
 }
