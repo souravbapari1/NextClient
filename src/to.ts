@@ -69,8 +69,10 @@ export class ToPath {
    * @param {T | Record<string, any>} data The data to be sent as a form body.
    * @returns {FormRequest} The FormRequest instance.
    */
-  form<T>(data: T | Record<string, any>) {
-    const formData: FormData = this.jsonToFormData(data as Record<string, any>);
+  form<T>(data?: T | Record<string, any>) {
+    const formData: FormData = data
+      ? this.jsonToFormData(data as Record<string, any>)
+      : new FormData();
     return new FormRequest(
       formData,
       this.path,

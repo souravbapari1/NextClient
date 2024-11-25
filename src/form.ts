@@ -38,7 +38,7 @@ export class FormRequest {
    * @param file The file to append
    * @returns A new FormRequest object with the appended file
    */
-  append(key: string, file: string | Blob) {
+  append(key: string, file: string | Blob | File) {
     this.formData.append(key, file);
     return new FormRequest(
       this.formData,
