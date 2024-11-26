@@ -144,7 +144,7 @@ export class ToPath {
    * @param {RequestInit} [init] Optional custom initialization options for the request.
    * @returns {Promise<T>} A promise that resolves with the response data of type T.
    */
-  async send<T, ERROR>(headers?: RequestInit["headers"], init?: RequestInit) {
+  async send<T>(headers?: RequestInit["headers"], init?: RequestInit) {
     const formData = new FormData();
     const request = new FormRequest(
       formData,
