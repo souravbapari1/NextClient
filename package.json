@@ -13,7 +13,8 @@
     "api"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "release": "bash release.sh"
   },
   "author": "Sourav Bapari <dev.souravbapari@gmail.com>",
   "license": "MIT",
