@@ -5,17 +5,18 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "keywords": [
+    "fetch",
     "xhr",
     "http",
     "ajax",
     "promise",
-    "fetch"
+    "api"
   ],
   "scripts": {
     "build": "tsc"
   },
   "author": "Sourav Bapari <dev.souravbapari@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "description": "use http request in very easy way",
   "repository": {
     "type": "git",
