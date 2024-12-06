@@ -48,7 +48,7 @@ export class JsonRequest {
    */
   async send<T>(
     headers?: [string, string][] | Record<string, string>
-  ): Promise<T> {
+  ): Promise<{ statusCode: number; data: T }> {
     try {
       const url = new URL(this.path, this.host);
       url.search = this.searchParams.toString();
@@ -65,7 +65,7 @@ export class JsonRequest {
         body: JSON.stringify(this.formData),
       });
       const contentType = response.headers.get("Content-Type") || "";
-
+      const statusCode = response.status;
       if (!response.ok) {
         // Clone the response to allow multiple reads of its body
         let clonedResponse = response.clone();
@@ -86,11 +86,11 @@ export class JsonRequest {
       if (contentType.includes("application/json")) {
         // Parse response body as JSON
         const responseData: T = await response.json();
-        return responseData;
+        return { statusCode, data: responseData };
       } else if (contentType.includes("text/") || contentType == "") {
         // Parse response body as text
         const responseData: T = (await response.text()) as T;
-        return responseData;
+        return { statusCode, data: responseData };
       } else {
         // Handle unexpected content types
         throw new Error(`Unsupported content type: ${contentType}`);

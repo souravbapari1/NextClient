@@ -64,7 +64,7 @@ export class FormRequest {
   async send<T>(
     headers?: [string, string][] | Record<string, string>,
     init?: RequestInit
-  ): Promise<T> {
+  ): Promise<{ statusCode: number; data: T }> {
     try {
       const url = new URL(this.path, this.host);
       url.search = this.searchParams.toString();
@@ -77,6 +77,7 @@ export class FormRequest {
         body: this.method === "GET" ? null : this.formData,
       });
 
+      const statusCode = response.status;
       if (!response.ok) {
         let clonedResponse = response.clone();
         // Clone the response to allow multiple reads of its body
@@ -98,11 +99,11 @@ export class FormRequest {
       if (contentType.includes("application/json")) {
         // Parse response body as JSON
         const responseData: T = await response.json();
-        return responseData;
+        return { statusCode, data: responseData };
       } else if (contentType.includes("text/") || contentType == "") {
         // Parse response body as text
         const responseData: T = (await response.text()) as T;
-        return responseData;
+        return { statusCode, data: responseData };
       } else {
         // Handle unexpected content types
         throw new Error(`Unsupported content type: ${contentType}`);
