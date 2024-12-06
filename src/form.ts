@@ -62,7 +62,7 @@ export class FormRequest {
    * @throws Error if the response content type is unsupported
    */
   async send<T>(
-    headers?: RequestInit["headers"],
+    headers?: [string, string][] | Record<string, string>,
     init?: RequestInit
   ): Promise<T> {
     try {

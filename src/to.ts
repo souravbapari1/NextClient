@@ -140,11 +140,14 @@ export class ToPath {
    * Sends a HTTP request using the current path, host, and other settings.
    *
    * @template T The expected response type.
-   * @param {RequestInit["headers"]} [headers] Optional custom headers to include in the request.
+   * @param {[string, string][] | Record<string, string> } [headers] Optional custom headers to include in the request.
    * @param {RequestInit} [init] Optional custom initialization options for the request.
    * @returns {Promise<T>} A promise that resolves with the response data of type T.
    */
-  async send<T>(headers?: RequestInit["headers"], init?: RequestInit) {
+  async send<T>(
+    headers?: [string, string][] | Record<string, string>,
+    init?: RequestInit
+  ) {
     const formData = new FormData();
     const request = new FormRequest(
       formData,

@@ -41,12 +41,14 @@ export class JsonRequest {
    * Sends an HTTP request to the specified path and host with the provided headers and returns the response.
    *
    * @template T The expected response type.
-   * @param {RequestInit["headers"]} [headers] Optional headers to include in the request, merged with default headers.
+   * @param {[string, string][] | Record<string, string> } [headers] Optional headers to include in the request, merged with default headers.
    * @returns {Promise<T>} A promise that resolves with the response data of type T.
    * @throws {HttpError} If the HTTP response status is not ok, throws an HttpError with the response status and error text.
    * @throws {Error} If the response content type is unsupported or if there is a network error.
    */
-  async send<T>(headers?: RequestInit["headers"]): Promise<T> {
+  async send<T>(
+    headers?: [string, string][] | Record<string, string>
+  ): Promise<T> {
     try {
       const url = new URL(this.path, this.host);
       url.search = this.searchParams.toString();
