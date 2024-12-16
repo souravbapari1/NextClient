@@ -1,4 +1,4 @@
-import { HttpError } from "./errror";
+import { HttpError } from "./error";
 import { TMethads } from "./to";
 import { NextClientConfig } from "../dist/types/config";
 
