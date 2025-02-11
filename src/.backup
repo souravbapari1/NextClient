@@ -1,71 +1,42 @@
 // Interface definitions
-/**
- * Configuration options for the NextClient.
- */
 interface NextClientConfig {
-  debug?: boolean; // Enable or disable debug mode
-  baseUrl: string; // Base URL for API requests
-  headers?: Record<string, string>; // Custom headers for requests
-  prefix?: string; // Optional prefix for the request path
+  debug?: boolean;
+  baseUrl: string;
+  headers?: Record<string, string>;
+  prefix?: string;
 }
 
-/**
- * Configuration options for requests made by NextClient.
- */
 interface NextClientBodyConfig extends NextClientConfig {
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"; // HTTP method
-  path: string; // Request path
-  query?: Record<string, string>; // Query parameters
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  path: string;
+  query?: Record<string, string>;
 }
 
-/**
- * Configuration options for appending data to requests.
- */
 interface NextBodyAppendConfig<T> extends NextClientBodyConfig {
-  data: T | Record<string, any>; // Data to be sent in the request
-  isForm: boolean; // Indicates if the data is form data
+  data: T | Record<string, any>;
+  isForm: boolean;
 }
 
-/**
- * Configuration options for executing requests.
- */
 interface NextClientExecuterConfig<T> extends NextBodyAppendConfig<T> {
-  url: URL; // Full URL for the request
-  formData?: FormData; // FormData object if applicable
+  url: URL;
+  formData?: FormData;
 }
 
-/**
- * Parameters for sending requests.
- */
 interface ParamsSend {
-  signal?: AbortSignal | null; // Abort signal for request cancellation
-  credentials?: RequestCredentials | null; // Credentials mode for the request
-  mode?: RequestMode | undefined; // Mode for the request
-  referrerPolicy?: ReferrerPolicy; // Referrer policy for the request
+  signal?: AbortSignal | null;
+  credentials?: RequestCredentials | null;
+  mode?: RequestMode | undefined;
+  referrerPolicy?: ReferrerPolicy;
 }
 
 // Base NextClient class
-/**
- * A client for making API requests.
- */
 export class NextClient {
   private config: NextClientConfig;
 
-  /**
-   * Initializes the NextClient with the provided configuration.
-   * @param config - Configuration options for the client.
-   */
   constructor(config: NextClientConfig) {
     this.config = config;
   }
 
-  /**
-   * Creates a request with the specified method and path.
-   * @param method - HTTP method for the request.
-   * @param path - Request path.
-   * @param query - Optional query parameters.
-   * @returns A NextClientBody instance for further configuration.
-   */
   private createRequest(
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
     path: string,
@@ -79,61 +50,26 @@ export class NextClient {
     });
   }
 
-  /**
-   * Sends a GET request.
-   * @param path - Request path.
-   * @param query - Optional query parameters.
-   * @returns A NextClientBody instance for further configuration.
-   */
   get(path: string, query?: Record<string, any>) {
     return this.createRequest("GET", path, query);
   }
 
-  /**
-   * Sends a POST request.
-   * @param path - Request path.
-   * @param query - Optional query parameters.
-   * @returns A NextClientBody instance for further configuration.
-   */
   post(path: string, query?: Record<string, any>) {
     return this.createRequest("POST", path, query);
   }
 
-  /**
-   * Sends a PUT request.
-   * @param path - Request path.
-   * @param query - Optional query parameters.
-   * @returns A NextClientBody instance for further configuration.
-   */
   put(path: string, query?: Record<string, any>) {
     return this.createRequest("PUT", path, query);
   }
 
-  /**
-   * Sends a PATCH request.
-   * @param path - Request path.
-   * @param query - Optional query parameters.
-   * @returns A NextClientBody instance for further configuration.
-   */
   patch(path: string, query?: Record<string, any>) {
     return this.createRequest("PATCH", path, query);
   }
 
-  /**
-   * Sends a DELETE request.
-   * @param path - Request path.
-   * @param query - Optional query parameters.
-   * @returns A NextClientBody instance for further configuration.
-   */
   delete(path: string, query?: Record<string, any>) {
     return this.createRequest("DELETE", path, query);
   }
 
-  /**
-   * Sends the request with the specified parameters.
-   * @param params - Optional parameters for the request.
-   * @returns A promise that resolves with the response data.
-   */
   send<R>(params?: ParamsSend) {
     const parser = new Parser<NextClientBodyConfig>(
       {
@@ -151,25 +87,13 @@ export class NextClient {
 }
 
 // NextClientBody class
-/**
- * Represents a body for a NextClient request.
- */
 class NextClientBody {
   private config: NextClientBodyConfig;
 
-  /**
-   * Initializes the NextClientBody with the provided configuration.
-   * @param config - Configuration options for the body.
-   */
   constructor(config: NextClientBodyConfig) {
     this.config = config;
   }
 
-  /**
-   * Appends form data to the request.
-   * @param data - Data to be sent as form data.
-   * @returns A NextBodyAppend instance for further configuration.
-   */
   form<T>(data: T | Record<string, any>) {
     return new NextBodyAppend<T>({
       ...this.config,
@@ -178,11 +102,6 @@ class NextClientBody {
     });
   }
 
-  /**
-   * Appends JSON data to the request.
-   * @param data - Data to be sent as JSON.
-   * @returns A NextBodyAppend instance for further configuration.
-   */
   json<T>(data: T | Record<string, any>) {
     return new NextBodyAppend<T>({
       ...this.config,
@@ -191,11 +110,6 @@ class NextClientBody {
     });
   }
 
-  /**
-   * Sends the request with the specified parameters.
-   * @param params - Optional parameters for the request.
-   * @returns A promise that resolves with the response data.
-   */
   send<R>(params?: ParamsSend) {
     const parser = new Parser(
       {
@@ -210,27 +124,14 @@ class NextClientBody {
   }
 }
 
-// NextBodyAppend class
-/**
- * Represents a body append for a NextClient request.
- */
+// NextFormAppend class
 class NextBodyAppend<T> {
   private config: NextBodyAppendConfig<T>;
 
-  /**
-   * Initializes the NextBodyAppend with the provided configuration.
-   * @param config - Configuration options for the body append.
-   */
   constructor(config: NextBodyAppendConfig<T>) {
     this.config = config;
   }
 
-  /**
-   * Sets a key-value pair in the data.
-   * @param key - The key to set.
-   * @param value - The value to set.
-   * @returns The current instance for method chaining.
-   */
   set(key: string, value: string | Blob | File) {
     this.config.data = {
       ...this.config.data,
@@ -239,23 +140,12 @@ class NextBodyAppend<T> {
     return this;
   }
 
-  /**
-   * Deletes a key from the data.
-   * @param key - The key to delete.
-   * @returns The current instance for method chaining.
-   */
   delete(key: string) {
     let currentData: any = this.config.data;
     delete currentData[key as any];
     this.config.data = currentData;
     return this;
   }
-
-  /**
-   * Sets custom headers for the request.
-   * @param headers - Headers to set.
-   * @returns The current instance for method chaining.
-   */
   headers<T>(headers: T | Record<string, string>) {
     this.config.headers = {
       ...this.config.headers,
@@ -264,31 +154,18 @@ class NextBodyAppend<T> {
     return this;
   }
 
-  /**
-   * Sends the request with the specified parameters.
-   * @param params - Optional parameters for the request.
-   * @returns A promise that resolves with the response data.
-   */
   send<R>(params?: ParamsSend) {
     const parser = new Parser<T>(this.config, params);
     return parser.exec<R>();
   }
 }
 
-/**
- * Parser class for processing requests.
- */
 class Parser<T> {
   private config: NextBodyAppendConfig<T>;
   private url: URL;
   private formData?: FormData;
   private params?: ParamsSend;
 
-  /**
-   * Initializes the Parser with the provided configuration.
-   * @param config - Configuration options for the parser.
-   * @param params - Optional parameters for the request.
-   */
   constructor(config: NextBodyAppendConfig<T>, params?: ParamsSend) {
     this.config = config;
     const url = this.generateUrl();
@@ -300,12 +177,6 @@ class Parser<T> {
       : undefined;
   }
 
-  /**
-   * Sets search parameters for the URL.
-   * @param params - Parameters to set.
-   * @param prefix - Optional prefix for the parameters.
-   * @returns A URLSearchParams object.
-   */
   private setSearchParams(
     params: { [key: string]: any },
     prefix = ""
@@ -327,10 +198,6 @@ class Parser<T> {
     return searchParams;
   }
 
-  /**
-   * Generates the full URL for the request.
-   * @returns The generated URL.
-   */
   private generateUrl() {
     const url = new URL(
       this.config.prefix
@@ -346,13 +213,6 @@ class Parser<T> {
     return url;
   }
 
-  /**
-   * Converts a JSON object to FormData.
-   * @param jsonObject - The JSON object to convert.
-   * @param formData - Optional FormData object to append to.
-   * @param parentKey - Optional parent key for nested objects.
-   * @returns The FormData object.
-   */
   private jsonToFormData(
     jsonObject: any,
     formData: FormData = new FormData(),
@@ -398,10 +258,6 @@ class Parser<T> {
     return formData;
   }
 
-  /**
-   * Executes the request and returns the response.
-   * @returns A promise that resolves with the response data.
-   */
   async exec<R>() {
     const executer = new Executer<T>({
       ...this.config,
@@ -412,23 +268,12 @@ class Parser<T> {
   }
 }
 
-/**
- * Custom error class for API errors.
- */
 export class NextApiError extends Error {
-  public status: number; // HTTP status code
-  public statusText: string; // HTTP status text
-  public url: string; // URL of the request
-  public response?: any; // Response data
+  public status: number;
+  public statusText: string;
+  public url: string;
+  public response?: any;
 
-  /**
-   * Initializes the NextApiError with the provided details.
-   * @param message - Error message.
-   * @param status - HTTP status code.
-   * @param statusText - HTTP status text.
-   * @param url - URL of the request.
-   * @param response - Optional response data.
-   */
   constructor(
     message: string,
     status: number,
@@ -451,56 +296,16 @@ export class NextApiError extends Error {
   }
 }
 
-/**
- * Handles errors from the NextClient.
- * @param error - The error to handle.
- * @param callback - Callback function to handle the error.
- * @param pass - Optional function to call if the error is not handled.
- */
-export const handleNextError = <T>(
-  error: any,
-  callback: (e: {
-    data?: Partial<T>;
-    statusText: string;
-    url: string;
-    message: string;
-  }) => void,
-  pass?: () => void
-) => {
-  if (error instanceof NextApiError) {
-    callback({
-      data: (error.response?.data as Partial<T>) || {},
-      statusText: error.statusText,
-      url: error.url,
-      message: error.message,
-    });
-  } else {
-    pass?.();
-  }
-};
-
-/**
- * Class for executing requests.
- */
 class Executer<T> {
   private config: NextClientExecuterConfig<T>;
+
   private params?: ParamsSend;
 
-  /**
-   * Initializes the Executer with the provided configuration.
-   * @param config - Configuration options for the executer.
-   * @param params - Optional parameters for the request.
-   */
   constructor(config: NextClientExecuterConfig<T>, params?: ParamsSend) {
     this.config = config;
     this.params = params;
   }
 
-  /**
-   * Fetches the response from the server.
-   * @param params - Optional parameters for the request.
-   * @returns A promise that resolves with the response.
-   */
   private fetcher(params?: ParamsSend) {
     const { url, method, data, headers = {}, isForm, formData } = this.config;
 
@@ -531,10 +336,6 @@ class Executer<T> {
     });
   }
 
-  /**
-   * Executes the request and returns the response data.
-   * @returns A promise that resolves with the response data.
-   */
   async exec<R>(): Promise<{
     data: R | any;
     status: number;
@@ -584,15 +385,40 @@ class Executer<T> {
         };
       } catch {
         const data = await response.text();
-        return {
-          data: data as unknown as R,
-          status: response.status,
-          statusText: response.statusText,
-          url: this.config.url.toString(),
-        };
+        {
+          return {
+            data: data as unknown as R,
+            status: response.status,
+            statusText: response.statusText,
+            url: this.config.url.toString(),
+          };
+        }
       }
     } catch (error) {
       throw error;
     }
   }
 }
+
+export const handleNextError = <T>(
+  error: any,
+  callback: (e: {
+    data?: Partial<T>;
+    statusText: string;
+    url: string;
+    message: string;
+  }) => void,
+
+  pass?: () => void
+) => {
+  if (error instanceof NextApiError) {
+    callback({
+      data: (error.response?.data as Partial<T>) || {},
+      statusText: error.statusText,
+      url: error.url,
+      message: error.message,
+    });
+  } else {
+    pass?.();
+  }
+};
